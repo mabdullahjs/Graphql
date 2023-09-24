@@ -10,23 +10,41 @@ import {todos} from './todo.mjs';
 const startServer = async ()=>{
     const app = express();
     const server = new ApolloServer({
-        typeDefs:`
-        type Todo {
-            id: ID!
-            title: String!
-            completed: Boolean
-        }
-
-        type Query {
-            getTodos: [Todo]
-        }
-        `,
-        resolvers:{
-            Query:{
-                getTodos: ()=> todos
+        typeDefs: `
+            type User {
+                id: ID!
+                name: String!
+                username: String!
+                email: String!
+                phone: String!
+                website: String!
             }
-        }
-    })
+    
+            type Todo {
+                id: ID!
+                title: String!
+                completed: Boolean
+                user: User
+            }
+    
+            type Query {
+                getTodos: [Todo]
+                getAllUsers: [User]
+                getUser(id: ID!): User
+            }
+    
+        `,
+        resolvers: {
+          Todo: {
+            user: (todo) => users.find((e) => e.id === todo.id),
+          },
+          Query: {
+            getTodos: () => todos,
+            getAllUsers: () => users,
+            getUser: async (parent, { id }) => users.find((e) => e.id === id),
+          },
+        },
+      });
 
     app.use(bodyParser.json())
     app.use(cors())
